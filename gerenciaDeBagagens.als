@@ -19,23 +19,21 @@ Cliente: Tiberio*/
 
 module gerenciaDeBagagens
 
-sig tipo{}
-
 sig ticket{
 	donoTk : one passageiro
 }
 	
-sig bagagem{
+abstract sig bagagem{
 	donoBg : one passageiro
 }
 
-/*
+
 sig bagagemLeve extends bagagem{}
 sig bagagemMediana extends bagagem{}
 sig bagagemPesada extends bagagem{}
-*/
 
-sig passageiro{
+
+abstract sig passageiro{
 	bagagemPas : set bagagem,
 	ticketPas : one ticket
 }
@@ -54,8 +52,8 @@ fact passageiroF {
 }
 
 fact bagagemF {
-	some b: bagagem | one b.donoBg
-	some b: bagagem, p: passageiro | b in p.bagagemPas 
+	all b: bagagem | one b.donoBg
+	all b: bagagem, p: passageiro | b in p.bagagemPas 
 }
 
 fact ticketF {
