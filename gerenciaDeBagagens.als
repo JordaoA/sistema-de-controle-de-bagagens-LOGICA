@@ -20,7 +20,7 @@ abstract sig passageiro{
 	ticketPas : one ticket
 }
 
-sig passageiroComun extends passageiro{}
+sig passageiroComum extends passageiro{}
 
 sig passageiroMilhagem extends passageiro{}
 
@@ -30,6 +30,10 @@ sig passageiroVip extends passageiro{}
 ---FACTS---
 fact passageiroF {
 	some q: passageiro | some q.bagagemPas || no q.bagagemPas
+	all p: passageiroComum,bm: bagagemMediana | !(bm in p.bagagemPas)
+
+
+
 }
 
 fact bagagemF {
