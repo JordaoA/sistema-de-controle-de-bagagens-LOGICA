@@ -42,22 +42,43 @@ sig passageiroVip extends passageiro{
 }
 					---FIM DAS SIGS---
 
+					---PREDICADOS---
+
+pred verifyBagagemVip[pv : passageiroVip ]{
+	lone pv.bagagemLevePas
+	#(pv.bagagemPesadaPas) <= 2
+	#(pv.bagagemMediaPas) <= 2
+}
+
+
+pred verifyBagagemMilhagem[pm : passageiroMilhagem ]{
+	lone pm.bagagemLevePas
+	lone pm.bagagemPesadaPas
+	lone pm.bagagemMediaPas
+}
+
+
+pred verifyBagagemComum[pc : passageiroComum ]{
+	lone pc.bagagemLevePas
+	lone pc.bagagemPesadaPas 
+	no pc.bagagemMediaPas
+}
+
+					---FIM DOS PREDICADOS---
+
 					---FACTS---
 
 ---Fatos relacionados ao passageiro
 fact passageiroF {
 
 --- passageiro Comum
-	all pc : passageiroComum | lone pc.bagagemLevePas && lone pc.bagagemPesadaPas 
-		&& no pc.bagagemMediaPas
+	all pc : passageiroComum |  verifyBagagemComum[pc]
 
 --- passageiro de Milhagem
-	all pm : passageiroMilhagem | lone pm.bagagemLevePas && lone pm.bagagemPesadaPas 
-		&& lone pm.bagagemMediaPas
+	all pm : passageiroMilhagem | verifyBagagemMilhagem[pm]
 
 --- passageiro Vip
-	all pv : passageiroVip| lone pv.bagagemLevePas && #(pv.bagagemPesadaPas) <= 2 
-		&& #(pv.bagagemMediaPas) <= 2
+	all pv : passageiroVip| verifyBagagemVip[pv]
 
 }
 
