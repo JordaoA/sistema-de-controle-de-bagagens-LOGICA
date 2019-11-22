@@ -2,10 +2,15 @@ module gerenciaDeBagagens
 
 					---SIGS---
 ---Assintura para o ticket---
-sig ticket{
+abstract sig ticket{
 	donoTk : one passageiro
 }
----Assintura para o ticket---	
+
+sig greenTicket extends ticket{}
+
+sig redTicket extends ticket{}
+
+---Assintura para o Bagagem---	
 abstract sig bagagem{
 	donoBg : one passageiro
 }
@@ -36,7 +41,7 @@ sig passageiroMilhagem extends passageiro{
 
 ---Assintura para o passageiro Vip---
 sig passageiroVip extends passageiro{
-	bagagemLevePas : set bagagemLeve,
+	bagagemLevePas : lone bagagemLeve,
 	bagagemPesadaPas : set bagagemPesada,
 	bagagemMediaPas : set bagagemMedia
 }
@@ -64,6 +69,13 @@ pred verifyBagagemComum[pc : passageiroComum ]{
 	no pc.bagagemMediaPas
 }
 
+pred isGreen[p: passageiro]{
+	p.ticketPas in greenTicket
+}
+
+pred isRed[p: passageiro]{
+	p.ticketPas in redTicket  
+}
 					---FIM DOS PREDICADOS---
 
 					---FACTS---
@@ -72,14 +84,13 @@ pred verifyBagagemComum[pc : passageiroComum ]{
 fact passageiroF {
 
 --- passageiro Comum
-	all pc : passageiroComum |  verifyBagagemComum[pc]
+	all pc : passageiroComum |  verifyBagagemComum[pc] implies isGreen[pc] else isRed[pc]  
 
 --- passageiro de Milhagem
-	all pm : passageiroMilhagem | verifyBagagemMilhagem[pm]
+	all pm : passageiroMilhagem | verifyBagagemMilhagem[pm] implies isGreen[pm] else isRed[pm]  
 
 --- passageiro Vip
-	all pv : passageiroVip| verifyBagagemVip[pv]
-
+	all pv : passageiroVip| verifyBagagemVip[pv] implies isGreen[pv] else isRed[pv]
 }
 
 ---Fatos relacionados a bagagem do passageiro.
@@ -111,4 +122,4 @@ fact ticketF {
 					---FIM DOS FATOS---
 
 pred show[]{}
-run show for 10
+run show for 5
