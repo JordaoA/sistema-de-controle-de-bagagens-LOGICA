@@ -1,16 +1,13 @@
 module gerenciaDeBagagens
 
----------------------SIGS---------------------
----Assintura para o ticket---
+---SIGS
+	---Assintura para o ticket
 abstract sig ticket{
 	donoTk : one passageiro
 }
 
-sig greenTicket extends ticket{}
-
-sig redTicket extends ticket{}
-
----Assintura para o Bagagem---	
+sig greenTicket, redTicket extends ticket{}
+	---Assintura para o Bagagem
 abstract sig bagagem{
 	donoBg : one passageiro
 }
@@ -19,12 +16,12 @@ sig bagagemLeve extends bagagem{} ---Assintura para o Bagagem Leve---
 sig bagagemMedia extends bagagem{} ---Assintura para o Bagagem Media---
 sig bagagemPesada extends bagagem{} ---Assintura para o Bagagem Pesada---
 
----Assintura para o passageiro abstrato---
+	---Assintura para o passageiro abstrato
 abstract sig passageiro{
 	ticketPas : one ticket
 }
 
----Assintura para o passageiro Comum---
+	---Assintura para o passageiro Comum
 sig passageiroComum extends passageiro{
 	bagagemLevePas : lone bagagemLeve,
 	bagagemPesadaPas : lone bagagemPesada,
@@ -32,24 +29,24 @@ sig passageiroComum extends passageiro{
 
 }
 
----Assintura para o passageiro Milhagem---
+	---Assintura para o passageiro Milhagem
 sig passageiroMilhagem extends passageiro{
 	bagagemLevePas : lone bagagemLeve,
 	bagagemPesadaPas : lone bagagemPesada,
 	bagagemMediaPas : lone bagagemMedia
 }
 
----Assintura para o passageiro Vip---
+	---Assintura para o passageiro Vip
 sig passageiroVip extends passageiro{
 	bagagemLevePas : lone bagagemLeve,
 	bagagemPesadaPas : set bagagemPesada,
 	bagagemMediaPas : set bagagemMedia
 }
----------------------FIM DAS SIGS---------------------
+---FIM DAS SIGS
 
 
----------------------PREDICADOS---------------------
-	------------------predicados para bagagens------------------
+---PREDICADOS
+	---predicados para bagagens
 pred verifyBagagemVip[pv : passageiroVip ]{
 	lone pv.bagagemLevePas
 	#(pv.bagagemPesadaPas) <= 2
@@ -70,7 +67,7 @@ pred verifyBagagemComum[pc : passageiroComum ]{
 	no pc.bagagemMediaPas
 }
 
-	------------------Predicados para tickets------------------
+	---Predicados para tickets
 pred isGreen[p: passageiro]{
 	p.ticketPas in greenTicket
 }
@@ -78,24 +75,24 @@ pred isGreen[p: passageiro]{
 pred isRed[p: passageiro]{
 	p.ticketPas in redTicket  
 }
----------------------FIM DOS PREDICADOS---------------------
+---FIM DOS PREDICADOS
 
 
----------------------FACTS---------------------
----Fatos relacionados ao passageiro
+---FACTS
+	---Fatos relacionados ao passageiro
 fact passageiroF {
 
---- passageiro Comum
+	--- passageiro Comum
 	all pc : passageiroComum |  verifyBagagemComum[pc] implies isGreen[pc] else isRed[pc]  
 
---- passageiro de Milhagem
+	--- passageiro de Milhagem
 	all pm : passageiroMilhagem | verifyBagagemMilhagem[pm] implies isGreen[pm] else isRed[pm]  
 
---- passageiro Vip
+	--- passageiro Vip
 	all pv : passageiroVip| verifyBagagemVip[pv] implies isGreen[pv] else isRed[pv]
 }
 
----Fatos relacionados a bagagem do passageiro.
+	---Fatos relacionados a bagagem do passageiro.
 fact bagagemF {
 	---Bagagem generica
 	all b: bagagem | one b.donoBg
@@ -116,16 +113,15 @@ fact bagagemF {
 	all bm: bagagemMedia, pv: passageiroVip | bm in pv.bagagemMediaPas
 }
 
----Fatos relacionados ao passageiro
+	---Fatos relacionados ao passageiro
 fact ticketF {
 	all t: ticket, p: passageiro | p in t.donoTk and t in p.ticketPas
 }
+---FIM DOS FATOS
 
----------------------FIM DOS FATOS---------------------
 
-
----------------------ASSERTS---------------------
-------------------Assersts para passageiro Comum------------------
+---TESTES COM ASSERTS E CHECKS
+	---Assersts para passageiro Comum
 assert passageiroComumValido{
 	all pc: passageiroComum | pc.ticketPas = greenTicket implies
 		( lone pc.bagagemLevePas and no pc.bagagemMediaPas 
@@ -138,32 +134,36 @@ assert passageiroComumInvalido{
 		   	  or #(pc.bagagemPesadaPas) > 1 )
 }
 
-------------------Assersts para passageiro Milhagem------------------
+	---Assersts para passageiro Milhagem
 assert passageiroMilhagemValido{
 all pm: passageiroMilhagem | pm.ticketPas = greenTicket implies
-		( lone pm.bagagemLevePas and lone pm.bagagemMediaPas 
-		   and lone pm.bagagemPesadaPas )
+		(lone pm.bagagemLevePas and lone pm.bagagemMediaPas and lone pm.bagagemPesadaPas)
 }
 
 assert passageiroMilhagemInvalido{
 	all pm: passageiroMilhagem | pm.ticketPas = greenTicket implies
-			( #(pm.bagagemLevePas) > 1 or #(pm.bagagemLevePas) > 1 
-		   	  or #(pm.bagagemPesadaPas) > 1 )
+	( #(pm.bagagemLevePas) > 1 or #(pm.bagagemLevePas) > 1 or #(pm.bagagemPesadaPas) > 1)
 }
 
-------------------Assersts para passageiro Vip------------------
+	---Assersts para passageiro Vip
 assert passageiroVipValido{
 	all pv: passageiroVip | pv.ticketPas = greenTicket implies
-			( #(pv.bagagemPesadaPas) <= 2 and #(pv.bagagemMediaPas) <= 2 
-		   		and lone pv.bagagemLevePas )
+	( #(pv.bagagemPesadaPas) <= 2 and #(pv.bagagemMediaPas) <= 2 and lone pv.bagagemLevePas)
 }
 
-assert passageiroVipInalido{
+assert passageiroVipInvalido{
 	all pv: passageiroVip | pv.ticketPas = greenTicket implies
-			( #(pv.bagagemPesadaPas) > 2 or #(pv.bagagemMediaPas) > 2 
-		   		or  #(pv.bagagemLevePas) > 1 )
+	( #(pv.bagagemPesadaPas) > 2 or #(pv.bagagemMediaPas) > 2 or  #(pv.bagagemLevePas) > 1)
 }
----------------------FIM DOS ASSERTS---------------------
+
+check passageiroComumValido for 10
+check passageiroComumInvalido for 10
+check passageiroMilhagemValido for 10
+check passageiroMilhagemInvalido for 10
+check passageiroVipValido for 10
+check passageiroVipInvalido for 10
+
+---FIM DOS TESTES
 
 pred show[]{}
 run show for 8
