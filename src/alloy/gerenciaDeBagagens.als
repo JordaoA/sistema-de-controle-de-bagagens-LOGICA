@@ -23,25 +23,39 @@ sig passageiroMilhagem extends passageiro{}
 	---Assintura para o passageiro Vip
 sig passageiroVip extends passageiro{}
 
+---FUNÇÕES
+	---retorna as bagagens leves de um passageiro
+fun retornaBagagensLeve[p : passageiro] : set bagagem {
+	p.bagagens & bagagemLeve
+}
+	---retorna as bagagens medias de um passageiro
+fun retornaBagagensMediana[p : passageiro] : set bagagem {
+ 	p.bagagens & bagagemMedia
+}
+	---retorna as bagagens pesadas de um passageiro
+fun retornaBagagensPesada[p : passageiro] : set bagagem {
+	p.bagagens & bagagemPesada
+}
+
 ---PREDICADOS
 	---predicados para bagagens
-pred verificaBagagemVip[pv : passageiroVip ]{
-	lone (bagagemLeve & pv.bagagens)
-	#(bagagemMedia & pv.bagagens) <= 2
-	#(bagagemPesada & pv.bagagens) <= 2
+pred verificaBagagemVip[pv : passageiroVip ] {
+	lone (retornaBagagensLeve[pv])
+	#(retornaBagagensMediana[pv]) <= 2
+	#(retornaBagagensPesada[pv]) <= 2
 }
 
 pred verificaBagagemMilhagem[pm : passageiroMilhagem ]{
-	lone (bagagemLeve & pm.bagagens)
-	lone (bagagemMedia & pm.bagagens)
-	lone (bagagemPesada & pm.bagagens)
+	lone (retornaBagagensLeve[pm])
+	lone (retornaBagagensMediana[pm])
+	lone (retornaBagagensPesada[pm])
 
 }
 
 pred verificaBagagemComum[pc : passageiroComum ]{
-	lone (bagagemLeve & pc.bagagens)
-	lone (bagagemPesada & pc.bagagens)
-	no (bagagemMedia & pc.bagagens)
+	lone (retornaBagagensLeve[pc])
+	no (retornaBagagensMediana[pc])
+	lone (retornaBagagensPesada[pc])
 }
 
 	---Predicados para tickets
