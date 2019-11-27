@@ -1,0 +1,103 @@
+MODULE main
+	VAR
+		passageiro: {comum, milhagem, vip};
+		bagagem: {start, leve, mediana, pesada, fim};
+		ticket: {verde,vermelho};
+		
+		bagagensLeves: 0..5;
+		bagagensMedianas: 0..5;
+		bagagensPesadas: 0..5;
+
+	ASSIGN
+		init(bagagensLeves):=0;
+		init(bagagensMedianas):=0;
+		init(bagagensPesadas):=0;
+		init(ticket):=verde;
+		init(bagagem):=start;
+		
+		next(passageiro):= case
+			passageiro = comum: comum;
+			passageiro = milhagem: milhagem;
+			TRUE: vip;
+		esac;
+	
+		next(bagagem):= case
+			bagagem = start:{leve, mediana, pesada, fim};
+			bagagem != fim:{leve, mediana, pesada, fim};
+			TRUE:fim;
+		esac;
+
+		next(bagagensLeves):= case
+			bagagem = leve & bagagensLeves<5: bagagensLeves+1;
+			TRUE: bagagensLeves;
+		esac;
+
+		next(bagagensMedianas):= case
+			bagagem = mediana & bagagensMedianas<5: bagagensMedianas+1;
+			TRUE: bagagensMedianas;
+		esac;
+
+		next(bagagensPesadas):= case
+			bagagem = pesada & bagagensPesadas<5: bagagensPesadas+1;
+			TRUE: bagagensPesadas;
+		esac;
+
+		next(ticket):=case
+			passageiro = comum & (bagagensLeves<2 & bagagensMedianas = 0 & bagagensPesadas < 2): verde;
+			passageiro = milhagem & (bagagensLeves<2 & bagagensMedianas < 2 & bagagensPesadas < 2): verde;
+			passageiro = vip & (bagagensLeves<2 & bagagensMedianas < 3 & bagagensPesadas < 3): verde;
+			TRUE: vermelho;
+		esac;
+
+
+	-- Restrições de bagagens do passageiro comum
+	-- Para ticket verde
+	LTLSPEC G(F((
+	passageiro = comum & bagagem = fim &
+	bagagensLeves < 2 &
+	bagagensMedianas < 1 &
+	bagagensPesadas < 2 ) -> (ticket = verde)));
+
+	-- Para ticket vermelho
+	LTLSPEC G(F((
+	passageiro = comum & bagagem = fim & (
+	bagagensLeves >= 2 |
+	bagagensMedianas >= 1 |
+	bagagensPesadas >= 2 )) -> (ticket = vermelho)));
+
+
+	-- Restrições de bagagens do passageiro milhagem
+	-- Para ticket verde 
+	LTLSPEC G(F((
+	passageiro = milhagem & bagagem = fim &
+	bagagensLeves < 2 &
+	bagagensMedianas < 2 &
+	bagagensPesadas < 2 ) -> (ticket = verde)));
+
+	-- Para ticket vermelho
+	LTLSPEC G(F((
+	passageiro = milhagem & bagagem = fim & (
+	bagagensLeves >= 2 |
+	bagagensMedianas >= 2 |
+	bagagensPesadas >= 2 )) -> (ticket = vermelho)));
+
+
+	-- Restrições de bagagens do passageiro VIP
+	-- Para ticket verde
+	LTLSPEC G(F((
+	passageiro = vip & bagagem = fim &
+	bagagensLeves < 2 &
+	bagagensMedianas < 3 &
+	bagagensPesadas < 3 ) -> (ticket = verde)));
+
+	-- Para ticket vermelho
+	LTLSPEC G(F((
+	passageiro = vip & bagagem = fim & (
+	bagagensLeves >= 2 |
+	bagagensMedianas >= 3 &
+	bagagensPesadas >= 3 )) -> (ticket = vermelho)));
+
+	-- Verificação para duas ou mais bagagens leves ou, três ou mais bagagens,
+	-- sendo elas medianas ou pesadas resultam em um ticket vermelho.
+
+	LTLSPEC G((bagagensLeves > 1 | bagagensMedianas > 2 | bagagensPesadas > 2) -> (ticket = vermelho));
